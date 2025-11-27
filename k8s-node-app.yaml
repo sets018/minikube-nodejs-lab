@@ -34,18 +34,3 @@ spec:
   - name: http
     targetPort: 3000
     port: 80
-
-- name: Apply Kubernetes Manifests
-run: kubectl apply -f deploy-to-minikube-github-actions.yaml
-
----
-
-- name: Wait for Rollout
-  run: |
-    # Esperar hasta que el deployment esté disponible (timeout de 2 mins)
-    kubectl wait --for=condition=available deployment/nodejs-app --timeout=120s
-
-# ------------------------
-
-- name: Get Service URL
-  run: minikube service nodejs-app --url
