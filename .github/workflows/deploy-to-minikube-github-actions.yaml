@@ -8,10 +8,13 @@ jobs:
     name: build Node.js Docker Image and deploy to minikube
     steps:
     - uses: actions/checkout@v2
+
     - name: Start minikube
       uses: medyagh/setup-minikube@master
+
     - name: Try the cluster !
       run: kubectl get pods -A
+
     - name: Build image
       run: |
           export SHELL=/bin/bash
@@ -19,9 +22,19 @@ jobs:
           docker build -f ./Dockerfile -t devopshint/node-app:latest .
           echo -n "verifying images:"
           docker images         
+
     - name: Deploy to minikube
-      run:
-        kubectl apply -f k8s-node-app.yaml
+      # Asegúrate de que k8s-node-app.yaml existe en tu repositorio y está limpio
+      run: kubectl apply -f k8s-node-app.yaml
+
+    # --- ESTE ES EL PASO CRÍTICO QUE FALTABA ---
+    - name: Wait for Rollout
+      run: |
+        echo "Esperando a que el pod arranque..."
+        kubectl wait --for=condition=available deployment/nodejs-app --timeout=120s
+        kubectl get pods
+    # -------------------------------------------
+
     - name: Test service URLs
       run: |
           minikube service list
